@@ -2,6 +2,8 @@ const router = require('express').Router();
 const bcrypt = require('bcrypt');
 const{userModel} = require('../models/user.js');
 console.log(userModel)
+const {categoryModel} = require('../models/category')
+
 const {authUser} = require('../middleware/autharizaton');
 const session = require('express-session');
 const multer = require('multer');
@@ -9,12 +11,12 @@ const {Base64} = require('js-base64');
 const upload = multer({ storage: multer.memoryStorage() })
 const cloudinary = require('cloudinary').v2;
 cloudinary.config({ 
-    cloud_name: 'duprpeyly', 
+    cloud_name: 'sivagodasi', 
     api_key: process.env.API_KEY, 
     api_secret: process.env.API_SECRET,
   });
 
-router.get('/signup',(req,res)=>{
+router.get('/signup',async(req,res)=>{
     res.render('accounts/signup',{errors:req.flash('errors')})
 })
 
@@ -62,8 +64,9 @@ router.post('/login',async(req,res)=>{
     }  
 })
 
-router.get('/',(req,res)=>{
-    res.render('accounts/home')
+router.get('/',async(req,res)=>{
+    const category = await categoryModel.find({})
+    res.render('accounts/home',{category:category})
 })
 
 router.get('/profile',authUser,async(req,res)=>{
@@ -115,19 +118,6 @@ router.post('/editprofile',upload.single('picture'),authUser,async(req,res)=>{
             })
         }
         
-        // const filedata = req.file
-        // const encodeddata = Base64.encode(filedata.buffer)
-        // if(filedata){
-        //     await cloudinary.uploader.upload(`data:${filedata.mimetype};base64,${encodeddata}`,function(error,result){
-        //         console.log(result)
-        //         editdata.picture = result.secure_url             
-        //         // console.log(studentdata)
-        //     }); 
-        // }
-       
-
-        // })
-        // res.redirect('/profile')
    }catch(err){
         console.log(err)
    } 
