@@ -2,7 +2,8 @@ const router = require('express').Router();
 const bcrypt = require('bcrypt');
 const{userModel} = require('../models/user.js');
 console.log(userModel)
-const {categoryModel} = require('../models/category')
+const {cartModel} = require('../models/cart')
+console.log(cartModel)
 
 const {authUser} = require('../middleware/autharizaton');
 const session = require('express-session');
@@ -31,7 +32,9 @@ router.post('/signup',async(req,res)=>{
     user.password = req.body.password;
     // console.log(user)
     try{
+        
         const adduserdata = await userModel.create(user);
+        const cart = await cartModel.create({owner:adduserdata._id})
         res.redirect('/login')
     }catch(err){
         req.flash('errors','email is already present choose another email');
@@ -65,8 +68,26 @@ router.post('/login',async(req,res)=>{
 })
 
 router.get('/',async(req,res)=>{
-    const category = await categoryModel.find({})
-    res.render('accounts/home',{category:category})
+    try{
+        const user= await userModel.findOne({email:req.session.emailID})
+        let total=0
+        if(req.session.emailID){
+            const user = await userModel.findOne({email:req.session.emailID})
+            console.log(req.session.emailID)
+            console.log(user)
+            const cart = await cartModel.findOne({owner:user._id})
+            console.log(cart)
+            if(cart){
+                for(var i=0;i<cart.items.length;i++){
+                    total += cart.items[i].quantity
+                }
+            }
+            
+        }
+        res.render('accounts/home',{user:user,total:total})
+    }catch(err){
+        console.log(err)
+    }
 })
 
 router.get('/profile',authUser,async(req,res)=>{
@@ -74,7 +95,21 @@ router.get('/profile',authUser,async(req,res)=>{
     // console.log(profile.phonenumber)
     // console.log(profile)
     // console.log(req.session.emailID)
-    res.render('accounts/profile',{profile:profile})
+    let total=0
+    if(req.session.emailID){
+        const user = await userModel.findOne({email:req.session.emailID})
+        console.log(req.session.emailID)
+        console.log(user)
+        const cart = await cartModel.findOne({owner:user._id})
+        console.log(cart)
+        if(cart){
+            for(var i=0;i<cart.items.length;i++){
+                total += cart.items[i].quantity
+            }
+        }
+        res.render('accounts/profile',{profile:profile,total:total})
+    }
+    
     
 })
 // logout user

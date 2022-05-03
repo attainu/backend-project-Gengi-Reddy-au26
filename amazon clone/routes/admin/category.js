@@ -19,12 +19,12 @@ router.post('/addcategory',async(req,res)=>{
     }
 })
 
-router.get('/category',async(req,res)=>{
-    try{
-        const allcategories = await categoryModel.find({})
-        res.send(allcategories)
-    }catch(err){
-        console.log(err)
-    }
-})
+// router.get('/category',async(req,res)=>{
+//     try{
+//         const allcategories = await categoryModel.find({})
+//         res.send(allcategories)
+//     }catch(err){
+//         console.log(err)
+//     }
+// })
 module.exports = router;
